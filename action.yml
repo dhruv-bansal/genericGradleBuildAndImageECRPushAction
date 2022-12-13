@@ -52,6 +52,7 @@ runs:
         uses: gradle/gradle-build-action@v2
 
       - name: Execute Gradle build
+        shell: bash
         id: gradle-build-image
         run: |
           chmod +x ./gradlew
@@ -75,6 +76,7 @@ runs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Push Image
+        shell: bash
         env:
           ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
         run: |
