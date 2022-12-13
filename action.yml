@@ -23,6 +23,7 @@ runs:
   using: "composite"
   steps:
       - name: Workflow init step
+        shell: bash
         run: echo "workflow for artifact ${{ inputs.artifact_name }} initiated
 
       - name: Download ${{ inputs.artifact_name }} backend service from artifacts
@@ -32,6 +33,7 @@ runs:
 
       - name: Debug step - List files and variables
         if: github.event.client_payload.debug == true
+        shell: bash
         run: |
           ls -aR
 
@@ -57,6 +59,7 @@ runs:
 
       - name: List docker image
         if: github.event.client_payload.debug == true
+        shell: bash
         run: |
           docker image ls
 
