@@ -1,0 +1,79 @@
+name: "Build backend application with Gradle and push image to ECR"
+description: "Build a container image and Pushes it to ECR registry"
+
+inputs:
+  artifact_name:
+    description: "Name of the artifact of the backend service"
+    required: true
+  ecr_repo_name:
+    description: "ecr repo name for the given backend service"
+    required: true
+  aws_access_key_id:
+    description: "aws access key"
+    required: true
+  aws_secret_access_key:
+    description: "AWS secret key"
+    required: true
+  docker_image_build_repo_name:
+    description: "repo name of the image that is created after gradle build"
+    required: true
+  docker_image_build_tag:
+    description: "tag of the image. Default: 1.0.0"
+runs:
+  using: "composite"
+  steps:
+      - name: Workflow init step
+        run: echo "workflow for artifact ${{ inputs.artifact_name }} initiated
+
+      - name: Download ${{ inputs.artifact_name }} backend service from artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.artifact_name }}
+
+      - name: Debug step - List files and variables
+        if: github.event.client_payload.debug == true
+        run: |
+          ls -aR
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3 #TODO: improves the timings for the same
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Validate Gradle wrapper
+        if: github.event.client_payload.debug == true
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Execute Gradle build
+        id: gradle-build-image
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bootBuildImage
+
+      - name: List docker image
+        if: github.event.client_payload.debug == true
+        run: |
+          docker image ls
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Push Image
+        env:
+          ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
+        run: |
+          docker tag ${{ inputs.docker_image_build_repo_name }}:${{inputs.docker_image_build_tag}} $ECR_REGISTRY/${{ inputs.ecr_repo_name }}
+          docker push $ECR_REGISTRY/${{ inputs.ecr_repo_name }}
