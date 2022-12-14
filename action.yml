@@ -18,7 +18,8 @@ inputs:
     description: "repo name of the image that is created after gradle build"
     required: true
   docker_image_build_tag:
-    description: "tag of the image. Default: 1.0.0"
+    description: "tag of the image"
+    default: "1:0:0"
 runs:
   using: "composite"
   steps:
