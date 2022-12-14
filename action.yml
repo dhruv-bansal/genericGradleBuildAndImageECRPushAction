@@ -80,5 +80,5 @@ runs:
         env:
           ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
         run: |
-          docker tag ${{ inputs.docker_image_build_repo_name }}:${{inputs.docker_image_build_tag}} $ECR_REGISTRY/${{ inputs.ecr_repo_name }}
+          docker tag ${{ inputs.docker_image_build_repo_name }}:${{ inputs.docker_image_build_tag }} $ECR_REGISTRY/${{ inputs.ecr_repo_name }}
           docker push $ECR_REGISTRY/${{ inputs.ecr_repo_name }}
