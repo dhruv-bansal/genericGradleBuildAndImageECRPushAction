@@ -19,7 +19,7 @@ inputs:
     required: true
   docker_image_build_tag:
     description: "tag of the image"
-    default: "1:0:0"
+    default: "1.0.0"
   enable_debug_actions:
     description: "flag to control if debugging steps has to be enabled or not"
     default: false
