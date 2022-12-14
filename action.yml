@@ -20,6 +20,10 @@ inputs:
   docker_image_build_tag:
     description: "tag of the image"
     default: "1:0:0"
+  enable_debug_actions:
+    description: "flag to control if debugging steps has to be enabled or not"
+    default: false
+
 runs:
   using: "composite"
   steps:
@@ -33,7 +37,7 @@ runs:
           name: ${{ inputs.artifact_name }}
 
       - name: Debug step - List files and variables
-        if: github.event.client_payload.debug == true
+        if: enable_debug_actions
         shell: bash
         run: |
           ls -aR
@@ -46,7 +50,7 @@ runs:
           cache: 'gradle'
 
       - name: Validate Gradle wrapper
-        if: github.event.client_payload.debug == true
+        if: enable_debug_actions
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
 
       - name: Setup Gradle
@@ -60,7 +64,7 @@ runs:
           ./gradlew bootBuildImage
 
       - name: List docker image
-        if: github.event.client_payload.debug == true
+        if: enable_debug_actions
         shell: bash
         run: |
           docker image ls
